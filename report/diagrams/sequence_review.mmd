@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as Utilisateur
+    participant FE as Angular Frontend
+    participant API as ReviewController
+    participant SVC as ReviewService
+    participant MONGO as MongoDB (estore.reviews)
+
+    U->>FE: Soumet un avis (note + commentaire)
+    FE->>API: POST /api/reviews\n{productId, rating, comment}\n(Authorization: Bearer JWT)
+    API->>API: @PreAuthorize("isAuthenticated()")
+    alt Token JWT absent ou invalide
+        API-->>FE: 401 Unauthorized
+        FE-->>U: Redirection vers login
+    else Token valide
+        API->>SVC: create(reviewRequest, currentUser)
+        SVC->>MONGO: save(Review{productId, userId,\n authorName, rating, comment,\n createdAt})
+        alt MongoDB disponible
+            MONGO-->>SVC: Review document (id auto-généré)
+            SVC-->>API: ReviewResponse
+            API-->>FE: 201 Created + ReviewResponse
+            FE-->>U: Avis publié — liste mise à jour
+        else MongoDB indisponible
+            MONGO-->>SVC: Exception connexion
+            SVC-->>API: 503 Service Unavailable
+            API-->>FE: 503
+            FE-->>U: Erreur — service temporairement indisponible
+        end
+    end
+
+    Note over FE,MONGO: La lecture des avis (GET /api/reviews/product/{id})\nest publique — aucun token requis

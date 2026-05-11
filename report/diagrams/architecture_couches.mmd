@@ -1,0 +1,31 @@
+graph TB
+    subgraph Presentation["Couche Présentation (Frontend Angular 18)"]
+        A1["Composants Standalone\n(ProductList, Cart, Auth, Admin...)"]
+        A2["Services Angular\n(AuthService, CartService, CatalogService...)"]
+        A3["Intercepteurs HTTP\n(authInterceptor, errorInterceptor)"]
+        A4["Gardes de route\n(authGuard, adminGuard)"]
+    end
+
+    subgraph Metier["Couche Métier (Backend Spring Boot 3.3.5)"]
+        B1["Contrôleurs REST\n(@RestController)"]
+        B2["Services métier\n(@Service)"]
+        B3["Mappers MapStruct\n(@Mapper)"]
+        B4["Sécurité JWT\n(JwtAuthFilter, BCrypt)"]
+    end
+
+    subgraph Donnees["Couche Données (Persistance hybride)"]
+        C1["Spring Data JPA\n(H2 dev / MySQL prod)"]
+        C2["Spring Data MongoDB\n(Reviews)"]
+        C3["Repositories JPA\n(9 domaines)"]
+        C4["Repository Mongo\n(ReviewRepository)"]
+    end
+
+    Presentation -->|"HTTP REST JSON\n(localhost:4200 → :8080)"| Metier
+    Metier --> C1
+    Metier --> C2
+    C1 --> C3
+    C2 --> C4
+
+    style Presentation fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    style Metier fill:#dcfce7,stroke:#22c55e,color:#14532d
+    style Donnees fill:#fef9c3,stroke:#eab308,color:#713f12

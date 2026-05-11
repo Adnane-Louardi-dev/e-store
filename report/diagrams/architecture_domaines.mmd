@@ -1,0 +1,29 @@
+graph LR
+    subgraph Core["Noyau transversal"]
+        SH["shared\n(BaseEntity, ApiError, PageResponse)"]
+        EX["exception\n(GlobalExceptionHandler,\nBusinessException,\nResourceNotFoundException)"]
+        CFG["config\n(SecurityConfig, CorsConfig,\nOpenApiConfig, DataSeeder,\nJpaAuditingConfig)"]
+    end
+
+    subgraph Domains["Domaines métier"]
+        CUS["customer\n(User, Profile, Role\nAuthService, JwtService\nJwtAuthFilter)"]
+        CAT["catalog\n(Category, Product\nProductService, CategoryService\nMapStruct mappers)"]
+        INV["inventory\n(Inventory\nInventoryService)"]
+        SHP["shopping\n(Cart, CartItem\nCartService)"]
+        BIL["billing\n(Order, OrderItem\nOrderService @Transactional)"]
+        REV["review\n(Review — MongoDB\nReviewService)"]
+    end
+
+    CUS -->|"JWT token"| SHP
+    CUS -->|"JWT token"| BIL
+    CAT -->|"Product ref"| INV
+    CAT -->|"Product ref"| SHP
+    CAT -->|"Product ref"| BIL
+    CAT -->|"productId"| REV
+    INV -->|"stock check"| SHP
+    INV -->|"decrement"| BIL
+    SHP -->|"checkout"| BIL
+    Core -.->|"used by all"| Domains
+
+    style Core fill:#f3e8ff,stroke:#a855f7,color:#581c87
+    style Domains fill:#fff7ed,stroke:#f97316,color:#7c2d12

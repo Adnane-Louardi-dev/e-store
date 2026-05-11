@@ -1,0 +1,50 @@
+graph LR
+    V(["Visiteur"])
+    U(["Utilisateur\nauthentifié"])
+    A(["Administrateur"])
+
+    subgraph Public["Fonctionnalités publiques"]
+        UC1["Parcourir le catalogue"]
+        UC2["Rechercher des produits"]
+        UC3["Voir le détail d'un produit"]
+        UC4["S'inscrire"]
+        UC5["Se connecter"]
+    end
+
+    subgraph Auth["Fonctionnalités authentifiées"]
+        UC6["Gérer le panier"]
+        UC7["Passer une commande"]
+        UC8["Consulter mes commandes"]
+        UC9["Gérer mon profil"]
+        UC10["Laisser un avis"]
+    end
+
+    subgraph Admin["Fonctionnalités administrateur"]
+        UC11["Gérer les catégories"]
+        UC12["Gérer les produits"]
+        UC13["Gérer les stocks"]
+        UC14["Voir toutes les commandes"]
+        UC15["Annuler / modifier une commande"]
+    end
+
+    V --> UC1
+    V --> UC2
+    V --> UC3
+    V --> UC4
+    V --> UC5
+    U --> UC1
+    U --> UC2
+    U --> UC3
+    U --> UC6
+    U --> UC7
+    U --> UC8
+    U --> UC9
+    U --> UC10
+    A --> UC11
+    A --> UC12
+    A --> UC13
+    A --> UC14
+    A --> UC15
+    A --> UC1
+    A --> UC2
+    A --> UC3

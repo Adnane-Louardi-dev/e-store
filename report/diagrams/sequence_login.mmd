@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor U as Utilisateur
+    participant FE as Angular Frontend
+    participant API as AuthController
+    participant SVC as AuthService
+    participant DB as UserRepository (JPA)
+    participant JWT as JwtService
+
+    U->>FE: Saisit email + mot de passe
+    FE->>API: POST /api/auth/login\n{email, password}
+    API->>SVC: login(loginRequest)
+    SVC->>DB: findByEmail(email)
+    DB-->>SVC: User entity
+    SVC->>SVC: BCrypt.matches(password, hash)
+    alt Credentials valides
+        SVC->>JWT: generateToken(user)
+        JWT-->>SVC: JWT string (exp: 24h)
+        SVC-->>API: AuthResponse {token, userId, role}
+        API-->>FE: 200 OK + AuthResponse
+        FE->>FE: localStorage.setItem('token', ...)
+        FE-->>U: Redirection vers catalogue
+    else Credentials invalides
+        SVC-->>API: BadCredentialsException
+        API-->>FE: 401 Unauthorized
+        FE-->>U: Message d'erreur
+    end

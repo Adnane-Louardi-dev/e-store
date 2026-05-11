@@ -1,0 +1,31 @@
+graph LR
+    subgraph FE["Frontend — Angular 18"]
+        NG["Navigateur\n(Chrome / Firefox)"]
+        ANG["Application Angular\nlocalhost:4200"]
+    end
+
+    subgraph BE["Backend — Spring Boot 3.3.5"]
+        API["REST API\nlocalhost:8080"]
+        SEC["Spring Security\nJWT + BCrypt"]
+        SVC["Services métier\n(6 domaines)"]
+        MAP["MapStruct\nDTO ↔ Entity"]
+    end
+
+    subgraph DB["Persistance"]
+        H2["H2 Database\n(profil dev)\nfichier ./data/estore"]
+        MYSQL["MySQL 8\n(profil mysql)\nport 3306"]
+        MONGO["MongoDB\n(Reviews)\nport 27017"]
+    end
+
+    NG --> ANG
+    ANG -->|"HTTP/JSON\nBearer JWT"| API
+    API --> SEC
+    SEC --> SVC
+    SVC --> MAP
+    SVC -->|"JPA"| H2
+    SVC -.->|"JPA (prod)"| MYSQL
+    SVC -->|"Spring Data MongoDB"| MONGO
+
+    style FE fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    style BE fill:#dcfce7,stroke:#22c55e,color:#14532d
+    style DB fill:#fef9c3,stroke:#eab308,color:#713f12

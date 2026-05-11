@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor U as Utilisateur
+    participant FE as Angular Frontend
+    participant API as CartController
+    participant SVC as CartService
+    participant INV as InventoryService
+    participant DB as JPA (H2/MySQL)
+
+    U->>FE: Clic "Ajouter au panier" (qty=N)
+    FE->>API: POST /api/cart/items\n{productId, quantity}\n(Authorization: Bearer JWT)
+    API->>SVC: addItem(productId, quantity)
+    SVC->>DB: findCartByCurrentUser()
+    alt Panier n'existe pas encore
+        SVC->>DB: createCart(user)
+    end
+    DB-->>SVC: Cart entity
+    SVC->>INV: findByProductId(productId)
+    INV-->>SVC: Inventory {quantity: stock}
+    alt Stock insuffisant (qty > stock)
+        SVC-->>API: BusinessException("Stock insuffisant")
+        API-->>FE: 422 Unprocessable Entity
+        FE-->>U: Alerte — stock insuffisant
+    else Stock suffisant
+        SVC->>DB: findCartItem(cart, product)
+        alt Article déjà dans le panier
+            SVC->>DB: cartItem.setQuantity(existing + qty)
+        else Nouvel article
+            SVC->>DB: save(CartItem{unitPrice: product.price})
+        end
+        DB-->>SVC: CartItem mis à jour
+        SVC-->>API: CartResponse
+        API-->>FE: 200 OK + CartResponse
+        FE->>FE: CartService.cartCount.set(N)
+        FE-->>U: Panier mis à jour (badge compteur)
+    end

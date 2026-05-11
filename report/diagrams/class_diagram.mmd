@@ -1,0 +1,94 @@
+classDiagram
+    class BaseEntity {
+        +Long id
+        +Instant createdAt
+        +Instant updatedAt
+    }
+
+    class User {
+        +String firstName
+        +String lastName
+        +String email
+        +String password
+        +Role role
+    }
+
+    class Profile {
+        +String phone
+        +String address
+        +String city
+        +String country
+    }
+
+    class Category {
+        +String name
+        +String description
+    }
+
+    class Product {
+        +String name
+        +String description
+        +BigDecimal price
+        +String imageUrl
+    }
+
+    class Inventory {
+        +int quantity
+    }
+
+    class Cart {
+        +BigDecimal total
+    }
+
+    class CartItem {
+        +int quantity
+        +BigDecimal unitPrice
+    }
+
+    class Order {
+        +Instant orderDate
+        +BigDecimal totalAmount
+        +OrderStatus status
+    }
+
+    class OrderItem {
+        +int quantity
+        +BigDecimal unitPrice
+        +String productName
+    }
+
+    class Review {
+        <<MongoDB Document>>
+        +String id
+        +Long productId
+        +Long userId
+        +String authorName
+        +int rating
+        +String comment
+        +Instant createdAt
+    }
+
+    BaseEntity <|-- User
+    BaseEntity <|-- Category
+    BaseEntity <|-- Product
+    BaseEntity <|-- Inventory
+    BaseEntity <|-- Cart
+    BaseEntity <|-- CartItem
+    BaseEntity <|-- Order
+    BaseEntity <|-- OrderItem
+
+    User "1" --> "1" Profile : has
+    User "1" --> "1" Cart : owns
+    User "1" --> "*" Order : places
+
+    Category "1" --> "*" Product : contains
+
+    Product "1" --> "1" Inventory : tracked by
+
+    Cart "1" --> "*" CartItem : contains
+    CartItem "*" --> "1" Product : references
+
+    Order "1" --> "*" OrderItem : contains
+    OrderItem "*" --> "1" Product : snapshot of
+
+    Product "1" --> "*" Review : reviewed by

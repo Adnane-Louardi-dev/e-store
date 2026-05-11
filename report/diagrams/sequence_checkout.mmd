@@ -1,0 +1,41 @@
+sequenceDiagram
+    actor U as Utilisateur
+    participant FE as Angular Frontend
+    participant API as OrderController
+    participant SVC as OrderService
+    participant CART as CartService
+    participant INV as InventoryService
+    participant DB as JPA (H2/MySQL)
+
+    U->>FE: Clic "Passer la commande"
+    FE->>API: POST /api/orders\n(Authorization: Bearer JWT)
+    API->>SVC: placeOrder()
+    Note over SVC,DB: @Transactional — atomique
+    SVC->>CART: getMyCart()
+    CART-->>SVC: Cart avec items
+    alt Panier vide
+        SVC-->>API: BusinessException("Panier vide")
+        API-->>FE: 422 Unprocessable Entity
+        FE-->>U: Erreur — panier vide
+    else Panier non vide
+        loop Pour chaque CartItem
+            SVC->>INV: findByProduct(product)
+            INV-->>SVC: Inventory
+            alt Stock insuffisant
+                SVC-->>API: BusinessException("Stock insuffisant")
+                API-->>FE: 422 Unprocessable Entity
+                FE-->>U: Erreur — stock insuffisant
+            else Stock suffisant
+                SVC->>DB: order.addItem(snapshot)
+                SVC->>INV: inventory.setQuantity(qty - ordered)
+                DB-->>SVC: OK
+            end
+        end
+        SVC->>CART: clearCart()
+        DB-->>SVC: Cart vidé
+        SVC->>DB: save(order) → status CONFIRMED
+        DB-->>SVC: Order persistée
+        SVC-->>API: OrderResponse
+        API-->>FE: 201 Created + OrderResponse
+        FE-->>U: Page de confirmation
+    end

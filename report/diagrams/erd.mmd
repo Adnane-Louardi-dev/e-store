@@ -1,0 +1,97 @@
+erDiagram
+    USERS {
+        bigint id PK
+        varchar first_name
+        varchar last_name
+        varchar email UK
+        varchar password
+        varchar role
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PROFILES {
+        bigint id PK
+        bigint user_id FK
+        varchar phone
+        varchar address
+        varchar city
+        varchar country
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CATEGORIES {
+        bigint id PK
+        varchar name UK
+        varchar description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        varchar name
+        text description
+        decimal price
+        varchar image_url
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    INVENTORIES {
+        bigint id PK
+        bigint product_id FK
+        int quantity
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CARTS {
+        bigint id PK
+        bigint user_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CART_ITEMS {
+        bigint id PK
+        bigint cart_id FK
+        bigint product_id FK
+        int quantity
+        decimal unit_price
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ORDERS {
+        bigint id PK
+        bigint user_id FK
+        timestamp order_date
+        decimal total_amount
+        varchar status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ORDER_ITEMS {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        varchar product_name
+        int quantity
+        decimal unit_price
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USERS ||--|| PROFILES : "has"
+    USERS ||--|| CARTS : "owns"
+    USERS ||--o{ ORDERS : "places"
+    CATEGORIES ||--o{ PRODUCTS : "contains"
+    PRODUCTS ||--|| INVENTORIES : "tracked by"
+    CARTS ||--o{ CART_ITEMS : "contains"
+    CART_ITEMS }o--|| PRODUCTS : "references"
+    ORDERS ||--o{ ORDER_ITEMS : "contains"
+    ORDER_ITEMS }o--|| PRODUCTS : "snapshot"
